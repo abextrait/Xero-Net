@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Xero.Api.Common;
 using Xero.Api.Core.Model.Status;
 
 namespace Xero.Api.Core.Model
 {
     [DataContract(Namespace = "")]
-    public class TrackingCategory
+    public class TrackingCategory : CoreData, IHasId
     {
         [DataMember(Name = "TrackingCategoryID")]
         public Guid Id { get; set; }
@@ -19,5 +20,9 @@ namespace Xero.Api.Core.Model
 
         [DataMember(EmitDefaultValue = false)]
         public List<Option> Options { get; set; }
+
+        //Added as Journal / JournalLine / TrackingCategory / Option does not exist.
+        [DataMember(EmitDefaultValue = false)]
+        public string Option { get; set; }
     }
 }

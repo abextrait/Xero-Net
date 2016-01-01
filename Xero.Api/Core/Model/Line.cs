@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Xero.Api.Common;
 using Xero.Api.Core.Model.Types;
 
 namespace Xero.Api.Core.Model
 {
     [DataContract(Name = "JournalLine", Namespace = "")]
-    public class Line
+    public class Line : CoreData, IHasId
     {
         [DataMember(Name = "JournalLineID", EmitDefaultValue = false)]
         public Guid Id { get; set; }
@@ -38,11 +39,20 @@ namespace Xero.Api.Core.Model
         [DataMember(EmitDefaultValue = false)]
         public string TaxName { get; set; }
         
+        //There is an inconsistency with TrackingCatgories on JournalLines between Journals and ManualJournals.
+        //Use TrackingCategories with Journals
         [DataMember(EmitDefaultValue = false)]
         public List<TrackingCategory> TrackingCategories { get; set; }
 
+        //Use Tracking with ManualJournals
+        [DataMember(EmitDefaultValue = false)]
+        public List<TrackingCategory> Tracking { get; set; }
+
         [DataMember(Name = "LineAmount", EmitDefaultValue = false)]
         public decimal Amount { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
+        public string Description { get; set; }
 
     }
 }

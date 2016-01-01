@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Net;
-using System.Net.Http;
-using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using Xero.Api.Core.Model;
 using Xero.Api.Infrastructure.Interfaces;
-using Xero.Api.Infrastructure.ThirdParty.ServiceStack.Text;
+using Xero.Api.Infrastructure.RateLimiter;
 
 namespace Xero.Api.Infrastructure.Http
 {
@@ -20,7 +16,8 @@ namespace Xero.Api.Infrastructure.Http
     {
         private readonly string _baseUri;
         private readonly IAuthenticator _auth;
-        private readonly ICertificateAuthenticator _certAuth;
+        private readonly IRateLimiter _rateLimiter;
+
         private readonly Dictionary<string, string> _headers;
 
         public DateTime? ModifiedSince { get; set; }
@@ -46,11 +43,10 @@ namespace Xero.Api.Infrastructure.Http
             _auth = auth;
         }
 
-        public HttpClient(string baseUri, ICertificateAuthenticator auth, IConsumer consumer, IUser user)
-            : this(baseUri, consumer, user)
+        public HttpClient(string baseUri, IAuthenticator auth, IConsumer consumer, IUser user, IRateLimiter rateLimiter)
+            : this(baseUri, auth, consumer, user)
         {
-            _certAuth = auth;
-            _auth = auth;
+            _rateLimiter = rateLimiter;
         }
 
         public string UserAgent
@@ -58,6 +54,11 @@ namespace Xero.Api.Infrastructure.Http
             get; set;
         }
 
+        public X509Certificate ClientCertificate
+        {
+            get;
+            set;
+        }
 
         public Response Post(string endpoint, string data, string contentType = "application/xml", string query = null)
         {
@@ -72,13 +73,17 @@ namespace Xero.Api.Infrastructure.Http
             }
             catch (WebException we)
             {
-                return new Response((HttpWebResponse)we.Response);
+	            if (we.Response != null)
+	            {
+		            return new Response((HttpWebResponse) we.Response);
+	            }
+
+	            throw;
             }
         }
             
         public Response PostMultipartForm(string endpoint, string contentType, string name, string filename, byte[] payload)
         {
-
             return WriteToServerWithMultipart(endpoint, contentType, name,filename, payload);
         }
 
@@ -86,13 +91,16 @@ namespace Xero.Api.Infrastructure.Http
         {
             try
             {
-                data.PrintDump();
-
                 return WriteToServer(endpoint, Encoding.UTF8.GetBytes(data), "PUT", contentType, query);
             }
             catch (WebException we)
             {
-                return new Response((HttpWebResponse)we.Response);
+	            if (we.Response != null)
+	            {
+		            return new Response((HttpWebResponse) we.Response);
+	            }
+
+	            throw;
             }
         }
 
@@ -105,7 +113,12 @@ namespace Xero.Api.Infrastructure.Http
             }
             catch (WebException we)
             {
-                return new Response((HttpWebResponse)we.Response);
+	            if (we.Response != null)
+	            {
+		            return new Response((HttpWebResponse) we.Response);
+	            }
+
+	            throw;
             }
         }
 
@@ -118,21 +131,31 @@ namespace Xero.Api.Infrastructure.Http
             }
             catch (WebException we)
             {
-                return new Response((HttpWebResponse)we.Response);
+	            if (we.Response != null)
+	            {
+		            return new Response((HttpWebResponse) we.Response);
+	            }
+
+	            throw;
             }
         }
 
         public Response Delete(string endpoint)
         {
-            try
-            {
-                var request = CreateRequest(endpoint, "DELETE");
-                return new Response((HttpWebResponse)request.GetResponse());
-            }
-            catch (WebException we)
-            {
-                return new Response((HttpWebResponse)we.Response);
-            }
+	        try
+	        {
+		        var request = CreateRequest(endpoint, "DELETE");
+		        return new Response((HttpWebResponse) request.GetResponse());
+	        }
+	        catch (WebException we)
+	        {
+		        if (we.Response != null)
+		        {
+			        return new Response((HttpWebResponse) we.Response);
+			}
+
+		        throw;
+	        }
         }
 
         private HttpWebRequest CreateRequest(string endPoint, string method, string accept = "application/json", string query = null)
@@ -163,17 +186,20 @@ namespace Xero.Api.Infrastructure.Http
             {
                 var oauthSignature = _auth.GetSignature(Consumer, User, request.RequestUri, method, Consumer);
 
-                AddHeader("Authorization", oauthSignature);                
+                AddHeader("Authorization", oauthSignature);
             }
             
             AddHeaders(request);
 
             request.UserAgent = !string.IsNullOrWhiteSpace(UserAgent) ? UserAgent : "Xero Api wrapper - " + Consumer.ConsumerKey;
             
-            if (_certAuth != null)
+            if (ClientCertificate != null)
             {
-                request.ClientCertificates.Add(_certAuth.Certificate);
+                request.ClientCertificates.Add(ClientCertificate);
             }
+
+            if (_rateLimiter != null)
+                _rateLimiter.WaitUntilLimit();
 
             return request;
         }
@@ -199,10 +225,7 @@ namespace Xero.Api.Infrastructure.Http
             using (var dataStream = request.GetRequestStream())
             {
                 dataStream.Write(bytes, 0, bytes.Length);
-                dataStream.Close();
             }
-
-          
         }
 
         private Response WriteToServerWithMultipart(string endpoint,string contentType, string name, string filename ,byte[] payload)
@@ -212,7 +235,6 @@ namespace Xero.Api.Infrastructure.Http
             WriteMultipartData(payload, request, contentType,name, filename);
             
             return new Response((HttpWebResponse)request.GetResponse());
-
         }
 
         private void WriteMultipartData(byte[] bytes, HttpWebRequest request, string contentType, string name, string filename)
@@ -220,11 +242,9 @@ namespace Xero.Api.Infrastructure.Http
             var boundary = Guid.NewGuid();
 
             byte[] header = Encoding.ASCII.GetBytes("\r\n--" + boundary + "\r\nContent-Disposition: form-data; name=" + name + "; FileName=" + filename + " \r\nContent-Type: " + contentType + "\r\n\r\n");
-            
             byte[] trailer = Encoding.ASCII.GetBytes("\r\n--" + boundary + "--\r\n");
 
             request.ContentType = "multipart/form-data; boundary=" + boundary;
-
             request.KeepAlive = false;
             
             var contentLength = bytes.Length + header.Length + trailer.Length;
@@ -232,23 +252,16 @@ namespace Xero.Api.Infrastructure.Http
             request.ContentLength = contentLength;
 
             var dataStream = request.GetRequestStream();
-            
             dataStream.Write(header, 0, header.Length);
-                
             dataStream.Write(bytes, 0, bytes.Length);
-
             dataStream.Write(trailer, 0, trailer.Length);
-
             dataStream.Close();
-
         }
 
         private Response WriteToServer(string endpoint, byte[] data, string method, string contentType = "application/xml", string query = null)
         {
             var request = CreateRequest(endpoint, method, query: query);
             WriteData(data, request, contentType);
-
-
 
             return new Response((HttpWebResponse)request.GetResponse());
         }        

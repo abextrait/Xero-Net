@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Xero.Api.Common;
 using Xero.Api.Core.Model.Status;
 using Xero.Api.Core.Model.Types;
 
 namespace Xero.Api.Core.Model
 {
     [DataContract(Namespace = "")]
-    public class TaxRate
+    public class TaxRate : CoreData
     {
         [DataMember]
         public string Name { get; set; }

@@ -8,7 +8,7 @@ using Xero.Api.Core.Model.Types;
 namespace Xero.Api.Core.Model
 {
     [DataContract(Namespace = "")]
-    public class CreditNote : HasUpdatedDate
+    public class CreditNote : HasUpdatedDate, IHasId
     {
         [DataMember(Name = "CreditNoteID", EmitDefaultValue = false)]
         public Guid Id { get; set; }
@@ -74,6 +74,9 @@ namespace Xero.Api.Core.Model
         public List<LineItem> LineItems { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
-        public List<Allocation> Allocations { get; set; }
+        public List<CreditNoteAllocation> Allocations { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
+        public List<Payment> Payments { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using Xero.Api.Core.Endpoints;
 using Xero.Api.Core.Model;
 using Xero.Api.Core.Model.Setup;
 using Xero.Api.Infrastructure.Interfaces;
+using Xero.Api.Infrastructure.RateLimiter;
 using Xero.Api.Serialization;
 using Organisation = Xero.Api.Core.Model.Organisation;
 
@@ -14,28 +15,48 @@ namespace Xero.Api.Core
     {
         private OrganisationEndpoint OrganisationEndpoint { get; set; }
 
-        public XeroCoreApi(string baseUri, IAuthenticator auth, IConsumer consumer, IUser user, IJsonObjectMapper readMapper, IXmlObjectMapper writeMapper)
-            : base(baseUri, auth, consumer, user, readMapper, writeMapper)
+        public XeroCoreApi(string baseUri, IAuthenticator auth, IConsumer consumer, IUser user,
+            IJsonObjectMapper readMapper, IXmlObjectMapper writeMapper)
+            : this(baseUri, auth, consumer, user, readMapper, writeMapper, null)
+        {
+        }
+
+        public XeroCoreApi(string baseUri, IAuthenticator auth, IConsumer consumer, IUser user, IJsonObjectMapper readMapper, IXmlObjectMapper writeMapper, IRateLimiter rateLimiter)
+            : base(baseUri, auth, consumer, user, readMapper, writeMapper, rateLimiter)
         {
             Connect();
         }
 
-        public XeroCoreApi(string baseUri, ICertificateAuthenticator auth, IConsumer consumer, IUser user, IJsonObjectMapper readMapper, IXmlObjectMapper writeMapper)
-            : base(baseUri, auth, consumer, user, readMapper, writeMapper)
+        public XeroCoreApi(string baseUri, ICertificateAuthenticator auth, IConsumer consumer, IUser user,
+            IJsonObjectMapper readMapper, IXmlObjectMapper writeMapper)
+            : this(baseUri, auth, consumer, user, readMapper, writeMapper, null)
+        {
+        }
+
+        public XeroCoreApi(string baseUri, ICertificateAuthenticator auth, IConsumer consumer, IUser user, IJsonObjectMapper readMapper, IXmlObjectMapper writeMapper, IRateLimiter rateLimiter)
+            : base(baseUri, auth, consumer, user, readMapper, writeMapper, rateLimiter)
         {
             Connect();
         }
 
         public XeroCoreApi(string baseUri, IAuthenticator auth, IConsumer consumer, IUser user)
+            : this(baseUri, auth, consumer, user, null)
+        {
+        }
+
+        public XeroCoreApi(string baseUri, IAuthenticator auth, IConsumer consumer, IUser user, IRateLimiter rateLimiter)
             : this(baseUri, auth, consumer, user, new DefaultMapper(), new DefaultMapper())
         {
-            Connect();
         }
 
         public XeroCoreApi(string baseUri, ICertificateAuthenticator auth, IConsumer consumer, IUser user)
-            : base(baseUri, auth, consumer, user, new DefaultMapper(), new DefaultMapper())
+            : this(baseUri, auth, consumer, user, null)
         {
-            Connect();
+        }
+
+        public XeroCoreApi(string baseUri, ICertificateAuthenticator auth, IConsumer consumer, IUser user, IRateLimiter rateLimiter)
+            : this(baseUri, auth, consumer, user, new DefaultMapper(), new DefaultMapper(), rateLimiter)
+        {
         }
 
         public AccountsEndpoint Accounts { get; private set; }
@@ -56,9 +77,13 @@ namespace Xero.Api.Core
         public InvoicesEndpoint Invoices { get; private set; }
         public ItemsEndpoint Items { get; private set; }
         public JournalsEndpoint Journals { get; private set; }
+        public LinkedTransactionsEndpoint LinkedTransactions { get; private set; }
         public ManualJournalsEndpoint ManualJournals { get; private set; }
+        public OverpaymentsEndpoint Overpayments { get; private set; }
         public PaymentsEndpoint Payments { get; private set; }
         public PdfEndpoint PdfFiles { get; private set; }
+        public PrepaymentsEndpoint Prepayments { get; private set; }
+        public PurchaseOrdersEndpoint PurchaseOrders { get; private set; }
         public ReceiptsEndpoint Receipts { get; private set; }
         public RepeatingInvoicesEndpoint RepeatingInvoices { get; private set; }
         public ReportsEndpoint Reports { get; private set; }
@@ -90,9 +115,13 @@ namespace Xero.Api.Core
             Invoices = new InvoicesEndpoint(Client);
             Items = new ItemsEndpoint(Client);
             Journals = new JournalsEndpoint(Client);
+            LinkedTransactions = new LinkedTransactionsEndpoint(Client);
             ManualJournals = new ManualJournalsEndpoint(Client);
+            Overpayments = new OverpaymentsEndpoint(Client);
             Payments = new PaymentsEndpoint(Client);
             PdfFiles = new PdfEndpoint(Client);
+            Prepayments = new PrepaymentsEndpoint(Client);
+            PurchaseOrders = new PurchaseOrdersEndpoint(Client);
             Receipts = new ReceiptsEndpoint(Client);
             RepeatingInvoices = new RepeatingInvoicesEndpoint(Client);
             Reports = new ReportsEndpoint(Client);
@@ -310,5 +339,10 @@ namespace Xero.Api.Core
             return Setup.Update(item);
         }
 
-      }
+        public TrackingCategory Update(TrackingCategory item)
+        {
+            return TrackingCategories.Update(item);
+        }
+        
+    }
 }

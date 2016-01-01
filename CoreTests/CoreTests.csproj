@@ -12,8 +12,8 @@
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
     <TargetFrameworkProfile />
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -38,7 +38,10 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <None Include="Resources\cert\public_privatekey.pfx" />
+    <Content Include="Resources\cert\public_privatekey.txt" />
+    <Content Include="Resources\images\connect_xero_button_blue - Copy.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="Resources\images\connect_xero_button_blue.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -55,6 +58,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Integration\Accounts\Update.cs" />
     <Compile Include="Integration\Accounts\Find.cs" />
     <Compile Include="Integration\Allocations\Add.cs" />
     <Compile Include="Integration\BankTransactions\BankTransactionTest.cs" />
@@ -68,6 +72,7 @@
     <Compile Include="Integration\ContactGroups\ContactGroupsTest.cs" />
     <Compile Include="Integration\ContactGroups\Create.cs" />
     <Compile Include="Integration\ContactGroups\Delete.cs" />
+    <Compile Include="Integration\ContactGroups\Find.cs" />
     <Compile Include="Integration\ContactGroups\Remove_Contact.cs" />
     <Compile Include="Integration\ContactGroups\Update.cs" />
     <Compile Include="Integration\Contacts\ContactsTest.cs" />
@@ -90,9 +95,21 @@
     <Compile Include="Integration\Files\Files\AddFileTest.cs" />
     <Compile Include="Integration\Invoices\Find.cs" />
     <Compile Include="Integration\Invoices\InvoicesTest.cs" />
+    <Compile Include="Integration\Invoices\SummarizeErrors.cs" />
     <Compile Include="Integration\Items\Create.cs" />
+    <Compile Include="Integration\Items\TrackedItems\Create.cs" />
+    <Compile Include="Integration\Items\TrackedItems\Find.cs" />
+    <Compile Include="Integration\Items\TrackedItems\TrackedInventoryTest.cs" />
+    <Compile Include="Integration\Items\TrackedItems\Update.cs" />
+    <Compile Include="Integration\Items\TrackedItems\Using_tracked_items.cs" />
+    <Compile Include="Integration\Items\Delete.cs" />
     <Compile Include="Integration\Items\Update.cs" />
     <Compile Include="Integration\Journals\Find.cs" />
+    <Compile Include="Integration\LinkedTransactions\Create.cs" />
+    <Compile Include="Integration\LinkedTransactions\Delete.cs" />
+    <Compile Include="Integration\LinkedTransactions\Find.cs" />
+    <Compile Include="Integration\LinkedTransactions\LinkedTransactionTest.cs" />
+    <Compile Include="Integration\LinkedTransactions\Update.cs" />
     <Compile Include="Integration\ManualJournals\Create.cs" />
     <Compile Include="Integration\ManualJournals\Find.cs" />
     <Compile Include="Integration\ManualJournals\ManualJournalsTest.cs" />
@@ -100,9 +117,13 @@
     <Compile Include="Integration\Organisation\Find.cs" />
     <Compile Include="Integration\Payments\Create.cs" />
     <Compile Include="Integration\Payments\CreateForeignCurrency.cs" />
+    <Compile Include="Integration\Payments\Delete.cs" />
     <Compile Include="Integration\Payments\Find.cs" />
     <Compile Include="Integration\Payments\PaymentsTest.cs" />
     <Compile Include="Integration\Pdf\Get.cs" />
+    <Compile Include="Integration\Overpayments\Find.cs" />
+    <Compile Include="Integration\Prepayments\Find.cs" />
+    <Compile Include="Integration\PurchaseOrders\Find.cs" />
     <Compile Include="Integration\Receipts\Create.cs" />
     <Compile Include="Integration\Receipts\Update.cs" />
     <Compile Include="Integration\Receipts\ReceiptTest.cs" />
@@ -110,6 +131,15 @@
     <Compile Include="Integration\Setup\Create.cs" />
     <Compile Include="Integration\TaxRates\Update.cs" />
     <Compile Include="Integration\TaxRates\TaxRateTest.cs" />
+    <Compile Include="Integration\TrackingCategories\Delete.cs" />
+    <Compile Include="Integration\TrackingCategories\GetTrackingCategoriesIncludingArchieved.cs" />
+    <Compile Include="Integration\TrackingCategories\ArchiveTrackingCategory.cs" />
+    <Compile Include="Integration\TrackingCategories\UpdateTrackingOptions.cs" />
+    <Compile Include="Integration\TrackingCategories\GetTrackingCategories.cs" />
+    <Compile Include="Integration\TrackingCategories\UpdateTrackingCategory.cs" />
+    <Compile Include="Integration\TrackingCategories\AddTrackingOption.cs" />
+    <Compile Include="Integration\TrackingCategories\CreateTrackingCategories.cs" />
+    <Compile Include="Integration\TrackingCategories\TrackingCategoriesTest.cs" />
     <Compile Include="Random.cs" />
     <Compile Include="Integration\Invoices\Create.cs" />
     <Compile Include="Integration\Accounts\Create.cs" />
@@ -117,6 +147,8 @@
     <Compile Include="Integration\Attachments\Attachments.cs" />
     <Compile Include="Integration\General\Errors.cs" />
     <Compile Include="Integration\TaxRates\Create.cs" />
+    <Compile Include="Unit\RateLimiterTest.cs" />
+    <Compile Include="Unit\SummarizeErrors.cs" />
     <Compile Include="Unit\UrlEncoder.cs" />
     <Compile Include="Unit\Contacts.cs" />
     <Compile Include="Unit\FourDecimalPlaces.cs" />

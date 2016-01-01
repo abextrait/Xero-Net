@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using Xero.Api.Common;
 using Xero.Api.Core.Model.Status;
 using Xero.Api.Core.Model.Types;
 
 namespace Xero.Api.Core.Model
 {
     [DataContract(Namespace = "")]
-    public class Account
+    public class Account : CoreData, IHasId
     {
         [DataMember(Name = "AccountID", EmitDefaultValue = false)]
         public Guid Id { get; set; }
@@ -24,6 +25,9 @@ namespace Xero.Api.Core.Model
         public AccountType Type { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
+        public BankAccountType? BankAccountType { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
         public string TaxType { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
@@ -33,7 +37,7 @@ namespace Xero.Api.Core.Model
         public AccountClassType Class { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
-        public SystemAccountType SystemAccount { get; set; }
+        public SystemAccountType? SystemAccount { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
         public bool? EnablePaymentsToAccount { get; set; }

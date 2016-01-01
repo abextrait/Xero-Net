@@ -7,7 +7,7 @@ using Xero.Api.Core.Model.Status;
 namespace Xero.Api.Core.Model
 {
     [DataContract(Namespace = "")]
-    public class ExpenseClaim : HasUpdatedDate
+    public class ExpenseClaim : HasUpdatedDate, IHasId
     {
         [DataMember(Name = "ExpenseClaimID", EmitDefaultValue = false)]
         public Guid Id { get; set; }
@@ -35,5 +35,8 @@ namespace Xero.Api.Core.Model
 
         [DataMember(EmitDefaultValue = false)]
         public List<Receipt> Receipts { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
+        public List<Payment> Payments { get; set; }
     }
 }

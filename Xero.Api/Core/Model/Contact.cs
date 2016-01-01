@@ -7,7 +7,7 @@ using Xero.Api.Core.Model.Status;
 namespace Xero.Api.Core.Model
 {
     [DataContract(Namespace = "")]
-    public class Contact : HasUpdatedDate
+    public class Contact : HasUpdatedDate, IHasId
     {
         [DataMember(Name = "ContactID", EmitDefaultValue = false)]
         public Guid Id { get; set; }
@@ -73,6 +73,12 @@ namespace Xero.Api.Core.Model
         public string SalesAccountCode { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
+        public List<SalesTrackingCategory> SalesTrackingCategories { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
+        public List<PurchasesTrackingCategory> PurchasesTrackingCategories { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
         public BrandingTheme BrandingTheme { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
@@ -94,6 +100,9 @@ namespace Xero.Api.Core.Model
         public List<Phone> Phones { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
-        public List<ContactGroup> ContactGroups { get; set; }               
+        public List<ContactGroup> ContactGroups { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
+        public string AccountNumber { get; set; } 
     }
 }

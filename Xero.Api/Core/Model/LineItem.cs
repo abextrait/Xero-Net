@@ -1,9 +1,11 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
+using Xero.Api.Common;
 
 namespace Xero.Api.Core.Model
 {
     [DataContract(Namespace = "")]
-    public class LineItem
+    public class LineItem : CoreData
     {
         [DataMember(EmitDefaultValue = false)]
         public string Description { get; set; }
@@ -34,5 +36,8 @@ namespace Xero.Api.Core.Model
 
         [DataMember(EmitDefaultValue = false, Name = "Tracking")]
         public ItemTracking Tracking { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
+        public Guid LineItemId { get; set; }
     }
 }
